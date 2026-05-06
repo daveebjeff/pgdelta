@@ -55,6 +55,17 @@ func TestAlterSequenceSQL_IncrementAndCache(t *testing.T) {
 	assert.Contains(t, sql, "CACHE 20")
 }
 
+func TestAlterSequenceSQL_CycleChange(t *testing.T) {
+	old := baseSeq()
+	newSeq := baseSeq()
+	newSeq.Cycle = true
+
+	sql := AlterSequenceSQL(old, newSeq)
+	assert.Contains(t, sql, "ALTER SEQUENCE public.orders_id_seq")
+	assert.Contains(t, sql, "CYCLE")
+	assert.NotContains(t, sql, "NO CYCLE")
+}
+
 func TestAlterSequenceSQL_NoChanges(t *testing.T) {
 	s := baseSeq()
 	sql := AlterSequenceSQL(s, s)
