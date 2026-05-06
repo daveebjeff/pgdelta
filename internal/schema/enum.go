@@ -14,20 +14,20 @@ func (e Enum) FullName() string {
 	return fmt.Sprintf("%s.%s", e.Schema, e.Name)
 }
 
-// EnumDiff holds added and removed enum types between two schema snapshots.
+// EnumDiff holds added, removed, and changed enums.
 type EnumDiff struct {
 	Added   []Enum
 	Removed []Enum
 	Changed []EnumChange
 }
 
-// EnumChange represents a change in enum values for an existing enum.
+// EnumChange represents a change to an existing enum.
 type EnumChange struct {
 	Old Enum
 	New Enum
 }
 
-// DiffEnums computes the difference between two slices of enums.
+// DiffEnums computes the diff between two slices of enums.
 func DiffEnums(old, new []Enum) EnumDiff {
 	var diff EnumDiff
 
@@ -42,10 +42,10 @@ func DiffEnums(old, new []Enum) EnumDiff {
 	}
 
 	for _, e := range new {
-		if oldEnum, exists := oldMap[e.FullName()]; !exists {
+		if o, exists := oldMap[e.FullName()]; !exists {
 			diff.Added = append(diff.Added, e)
-		} else if !enumsEqual(oldEnum, e) {
-			diff.Changed = append(diff.Changed, EnumChange{Old: oldEnum, New: e})
+		} else if !enumsEqual(o, e) {
+			diff.Changed = append(diff.Changed, EnumChange{Old: o, New: e})
 		}
 	}
 
