@@ -8,6 +8,8 @@ import (
 )
 
 // CreateIndexSQL generates a CREATE INDEX statement for the given index.
+// If the index is unique, the UNIQUE keyword is included.
+// If the index method is not the default (btree), the USING clause is included.
 func CreateIndexSQL(idx schema.Index) string {
 	unique := ""
 	if idx.Unique {
@@ -33,11 +35,19 @@ func CreateIndexSQL(idx schema.Index) string {
 }
 
 // DropIndexSQL generates a DROP INDEX statement for the given index.
+// The schema-qualified index name is used to avoid ambiguity.
 func DropIndexSQL(idx schema.Index) string {
 	return fmt.Sprintf("DROP INDEX %s.%s;", idx.SchemaName, idx.Name)
 }
 
+// RenameIndexSQL generates an ALTER INDEX ... RENAME TO statement.
+func RenameIndexSQL(schemaName, oldName, newName string) string {
+	return fmt.Sprintf("ALTER INDEX %s.%s RENAME TO %s;", schemaName, oldName, newName)
+}
+
 // IndexDiffSQL generates SQL statements for all index differences.
+// Removed indexes are dropped first, changed indexes are dropped and recreated,
+// and new indexes are created last.
 func IndexDiffSQL(diff schema.IndexDiff) []string {
 	var stmts []string
 
