@@ -50,6 +50,15 @@ func TestCreateIndexSQL_NonBTreeMethod(t *testing.T) {
 	}
 }
 
+func TestCreateIndexSQL_MultipleColumns(t *testing.T) {
+	idx := sampleIndex
+	idx.Columns = []string{"first_name", "last_name"}
+	sql := CreateIndexSQL(idx)
+	if !strings.Contains(sql, "(first_name, last_name)") {
+		t.Errorf("expected multi-column list in SQL, got: %s", sql)
+	}
+}
+
 func TestDropIndexSQL(t *testing.T) {
 	sql := DropIndexSQL(sampleIndex)
 	expected := "DROP INDEX public.idx_users_email;"
