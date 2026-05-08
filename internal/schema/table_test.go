@@ -70,3 +70,17 @@ func TestDiffTables_ModifiedColumn(t *testing.T) {
 		t.Errorf("unexpected before/after types: %+v", diff.Modified[0])
 	}
 }
+
+func TestDiffTables_NullabilityChange(t *testing.T) {
+	before := baseTable()
+	after := baseTable()
+	after.Columns[2].Nullable = false // created_at becomes NOT NULL
+
+	diff := DiffTables(before, after)
+	if len(diff.Modified) != 1 || diff.Modified[0].Name != "created_at" {
+		t.Errorf("expected 1 modified column 'created_at', got %+v", diff.Modified)
+	}
+	if diff.Modified[0].Before.Nullable != true || diff.Modified[0].After.Nullable != false {
+		t.Errorf("expected nullable to change from true to false, got %+v", diff.Modified[0])
+	}
+}
