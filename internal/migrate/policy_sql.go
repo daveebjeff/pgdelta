@@ -62,6 +62,7 @@ func AlterPolicySQL(p schema.Policy) string {
 }
 
 // PolicyDiffSQL generates SQL statements for a PolicyDiff.
+// Statements are ordered: removals first, then additions, then alterations.
 func PolicyDiffSQL(diff schema.PolicyDiff) []string {
 	var stmts []string
 
@@ -78,4 +79,10 @@ func PolicyDiffSQL(diff schema.PolicyDiff) []string {
 	}
 
 	return stmts
+}
+
+// RenamePolicySQL generates an ALTER POLICY ... RENAME TO statement.
+func RenamePolicySQL(p schema.Policy, newName string) string {
+	return fmt.Sprintf("ALTER POLICY %s ON %s.%s RENAME TO %s;",
+		p.Name, p.Schema, p.Table, newName)
 }
