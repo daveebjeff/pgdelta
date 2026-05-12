@@ -67,3 +67,36 @@ func TestIndexMigration_FullCycle(t *testing.T) {
 		t.Errorf("expected a USING hash statement among: %v", stmts)
 	}
 }
+
+// TestIndexMigration_DroppedIndex verifies that removing an index generates
+// exactly one DROP INDEX statement with the correct index name.
+func TestIndexMigration_DroppedIndex(t *testing.T) {
+	oldIndexes := []schema.Index{
+		{
+			SchemaName: "public",
+			TableName:  "users",
+			Name:       "idx_users_email",
+			Columns:    []string{"email"},
+			Unique:     true,
+			Method:     schema.IndexMethodBTree,
+		},
+	}
+
+	diff := schema.DiffIndexes(oldIndexes, nil)
+
+	if len(diff.Removed) != 1 {
+		t.Fatalf("expected 1 removed index, got %d", len(diff.Removed))
+	}
+
+	stmts := migrate.IndexDiffSQL(diff)
+
+	if len(stmts) != 1 {
+		t.Fatalf("expected 1 SQL statement, got %d: %v", len(stmts), stmts)
+	}
+	if !strings.Contains(stmts[0], "DROP INDEX") {
+		t.Errorf("expected DROP INDEX statement, got: %s", stmts[0])
+	}
+	if !strings.Contains(stmts[0], "idx_users_email") {
+		t.Errorf("expected index name in DROP statement, got: %s", stmts[0])
+	}
+}
