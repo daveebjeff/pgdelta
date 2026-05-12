@@ -20,6 +20,11 @@ type ExtensionDiff struct {
 	Changed []Extension // version changed
 }
 
+// IsEmpty reports whether the diff contains no changes.
+func (d ExtensionDiff) IsEmpty() bool {
+	return len(d.Added) == 0 && len(d.Removed) == 0 && len(d.Changed) == 0
+}
+
 // DiffExtensions compares two slices of extensions and returns the diff.
 func DiffExtensions(old, new []Extension) ExtensionDiff {
 	oldMap := make(map[string]Extension, len(old))
