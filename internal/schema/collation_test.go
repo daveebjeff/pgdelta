@@ -58,3 +58,20 @@ func TestDiffCollations_ChangedDeterministic(t *testing.T) {
 	assert.Len(t, diff.Changed, 1)
 	assert.False(t, diff.Changed[0].Deterministic)
 }
+
+func TestDiffCollations_MultipleCollations(t *testing.T) {
+	second := Collation{
+		Schema:        "public",
+		Name:          "other_collation",
+		Provider:      "icu",
+		Locale:        "de-DE",
+		Deterministic: true,
+	}
+
+	// second exists in old but not new, baseCollation exists in both
+	diff := DiffCollations([]Collation{baseCollation, second}, []Collation{baseCollation})
+	assert.Empty(t, diff.Added)
+	assert.Len(t, diff.Removed, 1)
+	assert.Equal(t, second, diff.Removed[0])
+	assert.Empty(t, diff.Changed)
+}
