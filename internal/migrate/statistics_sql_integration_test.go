@@ -48,12 +48,16 @@ func TestStatisticsMigration_FullCycle(t *testing.T) {
 
 	foundDrop := false
 	foundCreate := false
+	foundNewCreate := false
 	for _, sql := range sqls {
 		if sql == `DROP STATISTICS public.order_stats;` {
 			foundDrop = true
 		}
 		if sql == `CREATE STATISTICS public.order_stats (dependencies) ON user_id, status FROM public.orders;` {
 			foundCreate = true
+		}
+		if sql == `CREATE STATISTICS public.item_stats (mcv) ON product_id, quantity FROM public.order_items;` {
+			foundNewCreate = true
 		}
 	}
 
@@ -62,5 +66,8 @@ func TestStatisticsMigration_FullCycle(t *testing.T) {
 	}
 	if !foundCreate {
 		t.Error("expected CREATE STATISTICS for changed statistic")
+	}
+	if !foundNewCreate {
+		t.Error("expected CREATE STATISTICS for newly added statistic")
 	}
 }
