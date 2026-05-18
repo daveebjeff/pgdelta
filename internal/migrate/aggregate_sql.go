@@ -30,6 +30,16 @@ func DropAggregateSQL(a schema.Aggregate) string {
 	return fmt.Sprintf("DROP AGGREGATE %s.%s(%s);", a.Schema, a.Name, args)
 }
 
+// ReplaceAggregateSQL generates SQL statements to replace an aggregate by
+// dropping the old definition and creating a new one. This is necessary
+// because PostgreSQL does not support ALTER AGGREGATE for most changes.
+func ReplaceAggregateSQL(old, new schema.Aggregate) []string {
+	return []string{
+		DropAggregateSQL(old),
+		CreateAggregateSQL(new),
+	}
+}
+
 // AggregateDiffSQL generates SQL statements for all aggregate changes.
 func AggregateDiffSQL(diff schema.AggregateDiff) []string {
 	var stmts []string
